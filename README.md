@@ -43,6 +43,18 @@ npm build
 bun ./build/index.js
 ```
 
+## Usage
+
+```bash
+bun run index.ts --verbose -i <folder name inside cdp> -o <local folder to save to result> -u <login identifier> -p <password>
+```
+
+ex:
+
+```bash
+bun run index.ts -i physique -o /home/me/School/CPGE/Physique -u ilingu -p ihad2CatsbutOnEisDeadsoNowitsOnly1
+```
+
 ## Made with:
 
 1. **Elegance** ✅
