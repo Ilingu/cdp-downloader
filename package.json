@@ -3,8 +3,7 @@
   "module": "index.ts",
   "type": "module",
   "scripts": {
-    "start": "bun run index.ts -v -i si -o /home/ilingu/Documents/School/CPGE/MP2I/SI",
-    "dev": "bun --watch run index.ts -i physique -o /home/ilingu/Documents/School/CPGE/MP2I/Physique",
+    "start": "bun run index.ts -v -i Physique -o /home/ilingu/Documents/School/CPGE/MP2I/Physique",
     "build": "bun build ./index.ts --outdir ./build --target=bun"
   },
   "devDependencies": {

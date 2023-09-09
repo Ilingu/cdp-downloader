@@ -7,21 +7,25 @@ import {
   downloadDocumentsFiles,
   toSafeSID,
   DocumentTree,
+  login,
 } from "./core";
 
-const { school_id, input_dir, output } = parseArgs();
+const { school_id, input_dir, output, username, password } = parseArgs();
 if (isVerbose())
   console.log("Provided args:", {
     school_id,
-    session_perm: process.env.CDP_SESSION_PERM,
-    session: process.env.CDP_SESSION,
     input_dir,
     output,
+    username,
+    password,
     verbose: process.env.VERBOSE,
   });
 
 const [SIDSuccess, safeSID] = toSafeSID(school_id);
 if (!SIDSuccess) throw console.error("[FATAL] invalid school id");
+
+const loginSuccess = await login(username, password, safeSID);
+if (!loginSuccess) throw console.error("[FATAL] failed to login to cdp");
 
 const [findSuccess, url] = await findInputDirUrl(safeSID, input_dir);
 if (!findSuccess)

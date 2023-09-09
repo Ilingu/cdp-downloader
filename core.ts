@@ -11,6 +11,53 @@ export const toSafeSID = (sid: string): [boolean, string] => {
   return [true, safeSID];
 };
 
+export const login = async (
+  username: string,
+  password: string,
+  sid: string
+): Promise<boolean> => {
+  try {
+    const form = new FormData();
+    form.append("login", username);
+    form.append("motdepasse", password);
+    form.append("permconn", "1");
+    form.append("connexion", "1");
+
+    const loginResp = await fetch(
+      `https://cahier-de-prepa.fr/${sid}/ajax.php`,
+      { method: "POST", body: form }
+    );
+    if (!loginResp.ok) return false;
+
+    const session = loginResp.headers.get("Set-Cookie");
+    if (typeof session !== "string") return false;
+
+    // session
+    const sessionMatches = Array.from(session.matchAll(/CDP_SESSION=(.*?);/gm));
+    if (sessionMatches.length <= 0) return false;
+
+    const loginCookie = sessionMatches.at(-1)?.[1];
+    if (typeof loginCookie !== "string") return false;
+
+    // session perm
+    const sessionPermMatches = Array.from(
+      session.matchAll(/CDP_SESSION_PERM=(.*?);/gm)
+    );
+    if (sessionPermMatches.length <= 0) return false;
+
+    const loginPermCookie = sessionPermMatches.at(-1)?.[1];
+    if (typeof loginPermCookie !== "string") return false;
+
+    process.env.CDP_SESSION_PERM = loginPermCookie;
+    process.env.CDP_SESSION = loginCookie;
+
+    return true;
+  } catch (error) {
+    console.error(error);
+    return false;
+  }
+};
+
 export const findInputDirUrl = async (
   sid: string,
   inputDoc: string
@@ -134,25 +181,6 @@ export const indexDocs = async (
           url: parentIndex?.url,
         },
       ];
-
-    // const subfolderResp = await Promise.all(
-    //   subfoldersIndex.map(async (parent) => {
-    //     const newUrl = cdp_url.split("/");
-    //     newUrl[newUrl.length - 1] = `docs${parent.url}`;
-
-    //     await Bun.sleep(1000); // to not overload the server
-    //     return indexDocs(newUrl.join("/"), parent);
-    //   })
-    // );
-
-    // if (!subfolderResp.every(([success, doc]) => success && doc !== null))
-    //   return [false, null];
-
-    // const subfoldersInfos = subfolderResp.map(([_, doc], i) => ({
-    //   name: parentIndex?.name,
-    //   url: parentIndex?.url,
-    //   ...(doc as DocumentTree),
-    // }));
 
     // for some reason if I try to parallelize the recusive calls it doesn't work as expected
     const subfoldersInfos: DocumentTree[] = [];
